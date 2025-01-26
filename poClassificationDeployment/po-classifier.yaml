@@ -1,32 +1,27 @@
 apiVersion: ai.sap.com/v1alpha1
 kind: ServingTemplate
 metadata:
-  # Unique name for your template
+  # Use a unique name for your AI Core instance
   name: po-classifier-template
 
   annotations:
-    scenarios.ai.sap.com/description: "PO classification (Direct/Indirect/Services + High/Low Priority)"
-    scenarios.ai.sap.com/name: "PO Classifier"
-    executables.ai.sap.com/description: "Serves classification logic for multiple S/4 routes"
+    scenarios.ai.sap.com/description: "Rule-based PO classification, no input artifacts"
+    scenarios.ai.sap.com/name: "PO Classifier (Minimal)"
+    executables.ai.sap.com/description: "Multi-route + priority classification for POs"
     executables.ai.sap.com/name: "po-classifier-service"
-    # If you plan to pass a model artifact, you can specify its kind:
-    artifacts.ai.sap.com.myClassificationModel.kind: "model"
 
   labels:
     scenarios.ai.sap.com/id: "po-classification"
     ai.sap.com/version: "1.0"
 
 spec:
+  # No input artifacts or parameters
   inputs:
-    artifacts:
-      - name: myClassificationModel
-        # You can reference a model stored in object storage if you need real ML
-        # If purely rule-based, you can keep this for potential future use or remove it.
-    parameters:
-      - name: greetmessage
-        type: string
+    artifacts: []
+    parameters: []
 
   template:
+    # This must be 'serving.kserve.io/v1beta1' for SAP AI Core serving
     apiVersion: "serving.kserve.io/v1beta1"
     metadata:
       annotations: |
@@ -37,12 +32,14 @@ spec:
         ai.sap.com/resourcePlan: starter
     spec: |
       predictor:
+        # Docker registry secret reference (optional if public image)
         imagePullSecrets:
-          - name: my-registry-secret   # Adjust for your Docker registry secret name
+          - name: my-registry-secret
         minReplicas: 1
         maxReplicas: 5
         containers:
           - name: kserve-container
+            # Replace this with your actual Docker image location
             image: "docker.io/<YOUR_DOCKER_USERNAME>/po-classifier:latest"
             ports:
               - containerPort: 9001
@@ -53,8 +50,3 @@ spec:
                 set -e &&
                 echo "Starting container..." &&
                 gunicorn --chdir /app/src main:app -b 0.0.0.0:9001
-            env:
-              - name: STORAGE_URI
-                value: "{{inputs.artifacts.myClassificationModel}}"
-              - name: greetingmessage
-                value: "{{inputs.parameters.greetmessage}}"
