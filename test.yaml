@@ -1,0 +1,44 @@
+# config.yaml
+apiVersion: ai.sap.com/v1alpha1
+kind: ServingTemplate
+metadata:
+  name: text-classifier
+  labels:
+    scenarios.ai.sap.com/id: text-classification
+    scenarios.ai.sap.com/version: "1.0.0"
+spec:
+  parameters:
+    - name: image
+      description: "Docker image for text classifier"
+    - name: port
+      description: "Port number for the service"
+      default: "5000"
+  template:
+    spec:
+      containers:
+        - name: text-classifier
+          image: "{{.Parameters.image}}"
+          ports:
+            - containerPort: 5000
+          env:
+            - name: PORT
+              value: "{{.Parameters.port}}"
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "500Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+
+# deployment.yaml
+apiVersion: ai.sap.com/v1alpha1
+kind: Serving
+metadata:
+  name: text-classifier-deployment
+spec:
+  template:
+    name: text-classifier
+    parameters:
+      image: "rugved88/global-classifier:latest"
+      port: "5000"
