@@ -1,0 +1,60 @@
+apiVersion: ai.sap.com/v1alpha1
+kind: ServingTemplate
+metadata:
+  # Unique name for your template
+  name: po-classifier-template
+
+  annotations:
+    scenarios.ai.sap.com/description: "PO classification (Direct/Indirect/Services + High/Low Priority)"
+    scenarios.ai.sap.com/name: "PO Classifier"
+    executables.ai.sap.com/description: "Serves classification logic for multiple S/4 routes"
+    executables.ai.sap.com/name: "po-classifier-service"
+    # If you plan to pass a model artifact, you can specify its kind:
+    artifacts.ai.sap.com.myClassificationModel.kind: "model"
+
+  labels:
+    scenarios.ai.sap.com/id: "po-classification"
+    ai.sap.com/version: "1.0"
+
+spec:
+  inputs:
+    artifacts:
+      - name: myClassificationModel
+        # You can reference a model stored in object storage if you need real ML
+        # If purely rule-based, you can keep this for potential future use or remove it.
+    parameters:
+      - name: greetmessage
+        type: string
+
+  template:
+    apiVersion: "serving.kserve.io/v1beta1"
+    metadata:
+      annotations: |
+        autoscaling.knative.dev/metric: concurrency
+        autoscaling.knative.dev/target: 1
+        autoscaling.knative.dev/targetBurstCapacity: 0
+      labels: |
+        ai.sap.com/resourcePlan: starter
+    spec: |
+      predictor:
+        imagePullSecrets:
+          - name: my-registry-secret   # Adjust for your Docker registry secret name
+        minReplicas: 1
+        maxReplicas: 5
+        containers:
+          - name: kserve-container
+            image: "docker.io/<YOUR_DOCKER_USERNAME>/po-classifier:latest"
+            ports:
+              - containerPort: 9001
+                protocol: TCP
+            command: ["/bin/sh", "-c"]
+            args:
+              - >
+                set -e &&
+                echo "Starting container..." &&
+                gunicorn --chdir /app/src main:app -b 0.0.0.0:9001
+            env:
+              - name: STORAGE_URI
+                value: "{{inputs.artifacts.myClassificationModel}}"
+              - name: greetingmessage
+                value: "{{inputs.parameters.greetmessage}}"
