@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: text-classifier-pipeline
+  annotations:
+    scenarios.ai.sap.com/description: "Text Classification Service with Random Response"
+    scenarios.ai.sap.com/name: "Text Classifier Demo"
+    executables.ai.sap.com/description: "Classifies text as good or bad with simulated processing"
+    executables.ai.sap.com/name: "Text Classification Service"
+  labels:
+    scenarios.ai.sap.com/id: "text-classifier-demo"
+    ai.sap.com/version: "1.0"
+
+spec:
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  entrypoint: mypipeline
+  
+  templates:
+    - name: mypipeline
+      steps:
+        - - name: mypredictor
+            template: mycodeblock1
+    
+    - name: mycodeblock1
+      container:
+        image: docker.io/rugved88/global-classifier:latest
+        command: ["/bin/sh", "-c"]
+        args:
+          - "python /app/app.py"
