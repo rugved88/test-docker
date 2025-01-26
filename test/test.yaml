@@ -7,50 +7,47 @@ metadata:
     scenarios.ai.sap.com/name: "Text Classifier Demo"
     executables.ai.sap.com/description: "Classifies text as good or bad with simulated processing"
     executables.ai.sap.com/name: "Text Classification Service"
-    serving.ai.sap.com/input-schema: |
-      {
-        "type": "object",
-        "properties": {
-          "text": {
-            "type": "string",
-            "description": "Text to classify"
-          }
-        }
-      }
-    serving.ai.sap.com/output-schema: |
-      {
-        "type": "object",
-        "properties": {
-          "classification": {
-            "type": "string",
-            "description": "Classification result (good/bad)"
-          },
-          "confidence": {
-            "type": "number",
-            "description": "Confidence score"
-          }
-        }
-      }
   labels:
     scenarios.ai.sap.com/id: "text-classifier-demo"
     ai.sap.com/version: "1.0"
-    serving.ai.sap.com/target: "true"
 
 spec:
   imagePullSecrets:
     - name: docker-registry-secret
 
   entrypoint: mypipeline
+
+  arguments:
+    parameters:
+      - name: port
+        value: "5000"
+      - name: host
+        value: "0.0.0.0"
   
   templates:
     - name: mypipeline
       steps:
         - - name: mypredictor
             template: mycodeblock1
+            arguments:
+              parameters:
+                - name: port
+                  value: "{{workflow.parameters.port}}"
+                - name: host
+                  value: "{{workflow.parameters.host}}"
     
     - name: mycodeblock1
+      inputs:
+        parameters:
+          - name: port
+          - name: host
       container:
         image: docker.io/rugved88/global-classifier:latest
         command: ["/bin/sh", "-c"]
         args:
           - "python /app/app.py"
+        env:
+          - name: PORT
+            value: "{{inputs.parameters.port}}"
+          - name: HOST
+            value: "{{inputs.parameters.host}}"
