@@ -40,7 +40,7 @@ spec:
         containers:
           - name: kserve-container
             # Replace this with your actual Docker image location
-            image: "docker.io/<YOUR_DOCKER_USERNAME>/po-classifier:latest"
+            image: "docker.io/rugved88/po-classifier:latest"
             ports:
               - containerPort: 9001
                 protocol: TCP
