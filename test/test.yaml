@@ -7,9 +7,34 @@ metadata:
     scenarios.ai.sap.com/name: "Text Classifier Demo"
     executables.ai.sap.com/description: "Classifies text as good or bad with simulated processing"
     executables.ai.sap.com/name: "Text Classification Service"
+    serving.ai.sap.com/input-schema: |
+      {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Text to classify"
+          }
+        }
+      }
+    serving.ai.sap.com/output-schema: |
+      {
+        "type": "object",
+        "properties": {
+          "classification": {
+            "type": "string",
+            "description": "Classification result (good/bad)"
+          },
+          "confidence": {
+            "type": "number",
+            "description": "Confidence score"
+          }
+        }
+      }
   labels:
     scenarios.ai.sap.com/id: "text-classifier-demo"
     ai.sap.com/version: "1.0"
+    serving.ai.sap.com/target: "true"
 
 spec:
   imagePullSecrets:
