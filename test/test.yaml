@@ -1,10 +1,32 @@
-apiVersion: serving.ai.sap.com/v1alpha1
+apiVersion: ai.sap.com/v1alpha1
 kind: ServingTemplate
 metadata:
   name: text-classifier-serving
   labels:
     scenarios.ai.sap.com/id: text-classifier-demo
     scenarios.ai.sap.com/version: "1.0.0"
+    serving.ai.sap.com/target: "true"
+  annotations:
+    serving.ai.sap.com/input-schema: |
+      {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Text to classify"
+          }
+        }
+      }
+    serving.ai.sap.com/output-schema: |
+      {
+        "type": "object",
+        "properties": {
+          "classification": {
+            "type": "string",
+            "description": "Classification result"
+          }
+        }
+      }
 spec:
   template:
     spec:
