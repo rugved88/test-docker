@@ -3,14 +3,13 @@ kind: ServingTemplate
 metadata:
   name: text-classifier-serving
   labels:
-    scenarios.ai.sap.com/id: text-classifier
+    scenarios.ai.sap.com/id: text-classifier-demo
     scenarios.ai.sap.com/version: "1.0.0"
-    serving.ai.sap.com/target: "true"
 spec:
   template:
     spec:
       containers:
-        - name: text-classifier
+        - name: classifier
           image: docker.io/rugved88/global-classifier:latest
           ports:
             - containerPort: 5000
