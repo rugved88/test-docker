@@ -34,7 +34,7 @@ spec:
       predictor:
         # Docker registry secret reference (optional if public image)
         imagePullSecrets:
-          - name: my-registry-secret
+          - name: docker-registry-secret
         minReplicas: 1
         maxReplicas: 5
         containers:
